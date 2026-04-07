@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "2.3.0"
+    application
 }
 
 group = "org.example"
@@ -12,6 +13,10 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.6")
+}
+
+application {
+    mainClass.set("de.thws.fiw.kotlin.mygrep.MygrepKt") // Wichtig: Dateiname mygrep.kt -> Class MygrepKt
 }
 
 kotlin {
