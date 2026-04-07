@@ -4,5 +4,5 @@ import kotlinx.cli.*
 
 fun main(args: Array<String>)
 {
-    print("Hello World23")
+    print("Hello World2345")
 }
