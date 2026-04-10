@@ -210,7 +210,7 @@ fun main(args: Array<String>) {
             abort("Der Ordner ${File(settings.directoryName).absolutePath} " +
                     "konnte nicht gefunden werden!")
         DirectoryStatus.NOT_READ ->
-            abort("Auf Den Ordner ${File(settings.directoryName).absolutePath} " +
+            abort("Auf den Ordner ${File(settings.directoryName).absolutePath} " +
                     "konnte nicht zugegriffen werden!")
         DirectoryStatus.SUCCESS -> {}
     }
