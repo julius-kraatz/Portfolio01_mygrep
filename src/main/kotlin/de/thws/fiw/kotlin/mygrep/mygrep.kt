@@ -6,8 +6,7 @@ import java.io.IOException
 import kotlin.system.exitProcess
 import kotlin.text.endsWith
 
-enum class Target
-{
+enum class Target {
     NONE,
     FILE,
     DIRECTORY,
@@ -21,43 +20,40 @@ data class Settings(
     val pattern: String,
     val fileName: String,
     val directoryName: String,
-    val target : Target
+    val target: Target
 )
 
-enum class FileStatus
-{
+enum class FileStatus {
     SUCCESS,
     NOT_FOUND,
     NOT_READ,
 }
 
-enum class DirectoryStatus
-{
+enum class DirectoryStatus {
     SUCCESS,
     NOT_FOUND,
     NOT_READ,
 }
 
 data class FileResult(
-    val file : File,
+    val file: File,
     val lines: List<LineInfo>,
-    val status : FileStatus
+    val status: FileStatus
 )
 
 data class DirectoryResult(
-    val fileResults : List<FileResult>,
-    val errorFileResult : FileResult?,
-    val status : DirectoryStatus
+    val fileResults: List<FileResult>,
+    val errorFileResult: FileResult?,
+    val status: DirectoryStatus
 )
 
 data class LineInfo(
-    val content : String,
-    val number : Int,
-    val fileName : String
+    val content: String,
+    val number: Int,
+    val fileName: String
 )
 
-fun parse(args: Array<String>): Settings
-{
+fun parse(args: Array<String>): Settings {
     val parser = ArgParser("mygrep")
 
     val ignoreCase = parser.option(
@@ -65,7 +61,7 @@ fun parse(args: Array<String>): Settings
         fullName = "ignorecase",
         shortName = "i",
         description = "Gross- und Kleinschreibung ignorieren"
-        ).default(false)
+    ).default(false)
 
     val printLineNumbers = parser.option(
         type = ArgType.Boolean,
@@ -112,72 +108,62 @@ fun parse(args: Array<String>): Settings
         else -> Target.NONE
     }
 
-    return Settings(ignoreCase.value, printLineNumbers.value, invertSearch.value, pattern.value,
-        file.value, directory.value, target)
+    return Settings(
+        ignoreCase.value, printLineNumbers.value, invertSearch.value, pattern.value,
+        file.value, directory.value, target
+    )
 }
 
-fun readFiles(settings: Settings) : DirectoryResult
-{
-    if(settings.target == Target.FILE)
-    {
+fun readFiles(settings: Settings): DirectoryResult {
+    if (settings.target == Target.FILE) {
         val file = File(settings.fileName)
         val fileResult = readFile(file)
         val errorFileResult = if (fileResult.status == FileStatus.SUCCESS) null else fileResult
-        return DirectoryResult( listOf(fileResult), errorFileResult, DirectoryStatus.SUCCESS)
+        return DirectoryResult(listOf(fileResult), errorFileResult, DirectoryStatus.SUCCESS)
     }
 
     val directory = File(settings.directoryName)
     if (!directory.exists() || !directory.isDirectory)
         return DirectoryResult(emptyList(), null, DirectoryStatus.NOT_FOUND)
 
-    val textFiles = directory.listFiles{_, name -> name.endsWith(".txt")}
-    if(textFiles == null)
+    val textFiles = directory.listFiles { _, name -> name.endsWith(".txt") }
+    if (textFiles == null)
         return DirectoryResult(emptyList(), null, DirectoryStatus.NOT_READ)
 
     val results = mutableListOf<FileResult>()
-    for(file in textFiles)
-    {
+    for (file in textFiles) {
         val result = readFile(file)
         results.add(result)
-        if(result.status != FileStatus.SUCCESS)
-        {
+        if (result.status != FileStatus.SUCCESS) {
             return DirectoryResult(results, result, DirectoryStatus.SUCCESS)
         }
     }
     return DirectoryResult(results, null, DirectoryStatus.SUCCESS)
 }
 
-fun readFile(file : File) : FileResult
-{
+fun readFile(file: File): FileResult {
     val lineInfos = mutableListOf<LineInfo>()
 
-    if(!file.exists()) return FileResult(file, lineInfos, FileStatus.NOT_FOUND)
+    if (!file.exists()) return FileResult(file, lineInfos, FileStatus.NOT_FOUND)
 
-    try
-    {
+    try {
         file.readLines().forEachIndexed { index, line ->
             lineInfos.add(LineInfo(line, index + 1, file.name))
         }
-    }
-    catch (_: IOException)
-    {
+    } catch (_: IOException) {
         return FileResult(file, lineInfos, FileStatus.NOT_READ)
     }
 
     return FileResult(file, lineInfos, FileStatus.SUCCESS)
 }
 
-fun search(results : List<FileResult>, settings: Settings) : List<String>
-{
+fun search(results: List<FileResult>, settings: Settings): List<String> {
     val (ignoreCase, printLineNumbers, invertSearch, pattern, fileName, directoryName, target) = settings
 
     val output = mutableListOf<String>()
-    for(result in results)
-    {
-        for(line in result.lines)
-        {
-            if (line.content.contains(pattern, ignoreCase) == !invertSearch)
-            {
+    for (result in results) {
+        for (line in result.lines) {
+            if (line.content.contains(pattern, ignoreCase) == !invertSearch) {
                 val filePrefix = if (target == Target.DIRECTORY) "(${line.fileName}): " else ""
                 val linePrefix = if (printLineNumbers) "|${line.number}| " else ""
                 output.add(filePrefix + linePrefix + line.content)
@@ -187,8 +173,7 @@ fun search(results : List<FileResult>, settings: Settings) : List<String>
     return output
 }
 
-fun abort(message : String)
-{
+fun abort(message: String) {
     System.err.println(message)
     exitProcess(1)
 }
@@ -198,20 +183,30 @@ fun main(args: Array<String>) {
     when (settings.target) {
         Target.NONE ->
             abort("Es wurde weder die Option -f <Dateiname.txt> noch die Option -d <Ordner> angegeben!")
+
         Target.BOTH ->
-            abort("Es wurden beide Optionen -f <Dateiname.txt> und -d <Ordner> angegeben!" +
-                    " Bitte nur eine der Optionen angeben!")
+            abort(
+                "Es wurden beide Optionen -f <Dateiname.txt> und -d <Ordner> angegeben!" +
+                        " Bitte nur eine der Optionen angeben!"
+            )
+
         else -> {}
     }
 
     val result = readFiles(settings)
     when (result.status) {
         DirectoryStatus.NOT_FOUND ->
-            abort("Der Ordner ${File(settings.directoryName).absolutePath} " +
-                    "konnte nicht gefunden werden!")
+            abort(
+                "Der Ordner ${File(settings.directoryName).absolutePath} " +
+                        "konnte nicht gefunden werden!"
+            )
+
         DirectoryStatus.NOT_READ ->
-            abort("Auf den Ordner ${File(settings.directoryName).absolutePath} " +
-                    "konnte nicht zugegriffen werden!")
+            abort(
+                "Auf den Ordner ${File(settings.directoryName).absolutePath} " +
+                        "konnte nicht zugegriffen werden!"
+            )
+
         DirectoryStatus.SUCCESS -> {}
     }
 

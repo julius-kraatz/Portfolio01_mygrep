@@ -3,8 +3,8 @@ plugins {
     application
 }
 
-group = "org.example"
-version = "1.0-SNAPSHOT"
+group = "de.thws.fiw"
+version = "1.0"
 
 repositories {
     mavenCentral()
@@ -25,4 +25,9 @@ kotlin {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.jar {
+    archiveBaseName.set("mygrep")
+    archiveVersion.set("")
 }
