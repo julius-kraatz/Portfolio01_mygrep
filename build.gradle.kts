@@ -17,6 +17,7 @@ dependencies {
 
 application {
     mainClass.set("de.thws.fiw.kotlin.mygrep.MygrepKt")
+    applicationName = "mygrep"
 }
 
 kotlin {
@@ -25,9 +26,4 @@ kotlin {
 
 tasks.test {
     useJUnitPlatform()
-}
-
-tasks.jar {
-    archiveBaseName.set("mygrep")
-    archiveVersion.set("")
 }
