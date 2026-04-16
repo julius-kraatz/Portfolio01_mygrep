@@ -158,7 +158,7 @@ fun readFile(file: File): FileResult {
 }
 
 fun search(results: List<FileResult>, settings: Settings): List<String> {
-    val (ignoreCase, printLineNumbers, invertSearch, pattern, fileName, directoryName, target) = settings
+    val (ignoreCase, printLineNumbers, invertSearch, pattern, _, _, target) = settings
 
     val output = mutableListOf<String>()
     for (result in results) {
