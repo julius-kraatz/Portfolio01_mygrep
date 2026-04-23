@@ -27,3 +27,20 @@ kotlin {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.jar {
+    archiveBaseName.set("mygrep")
+    archiveVersion.set("")
+
+    manifest {
+        attributes["Main-Class"] = "de.thws.fiw.kotlin.mygrep.MygrepKt"
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from({
+        configurations.runtimeClasspath.get().map {
+            if (it.isDirectory) it else zipTree(it)
+        }
+    })
+}
